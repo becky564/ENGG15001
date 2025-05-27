@@ -13,6 +13,11 @@ L0_minus = Pin(11, Pin.IN)  # GP11 for L0-
 # Initialise LED pin as an output
 led = Pin(20, Pin.OUT)
 
+# Initialise three variables for moving window
+value_1 = 0
+value_2 = 0
+value_3 = 0
+
 
 while True:
     # Check if any lead is off
@@ -20,26 +25,41 @@ while True:
         print("Lead off detected! Check ECG electrodes")
         led.off()
     else:
+        # Shift the variables
+        value_1 = value_2
+        value_2 = value_3
+        value_3 = heart_sensor.read_u16()
+
     # Read the signal from the heart monitor and potentiometer as u16
-     heart_reading = heart_sensor.read_u16()
-     potentiometer_reading = potentiometer.read_u16()
+
+        potentiometer_reading = potentiometer.read_u16()
 
 # Compare readings to control LED
-if heart_reading > potentiometer_reading:
+if value_3 > potentiometer_reading:
     led.on()
 
 else:
     led.off()
 
+# Peak detection
+if value_2 > peak_threshold and value_2 > value_1 and value_2 > value_3:
+    now = time.ticks_ms()
+    time_since_last = time.ticks_diff(now, last_peak_time)
+
+if time_since_last > min_interval:
+    last_peak_time = now
+    bpm = int(60000 / time_since_last)
+    print("Beat detected!")
+
 if heart_reading > 100:
-    print("stress, heart beating too fast, check for tachycardia")
+    print("stress: heart beating too fast, (tachycardia?)")
 
 else:
     heart_reading < 60
-    print("heart beating too slow, check for bradycardia")
+    print("heart beating too slow, (bradycardia?)")
 
 # Print the heart reading and potentiometer on the same line
-print(str(heart_reading) + "," + str(potentiometer_reading))
+print("ECG: {}, {}, {} | Pot: {} | BPM: {}".format(value_1, value_2, value_3, potentiometer_reading, bpm))
 
 # Insert 0.005s sleep to slow down the printing rate
 time.sleep(0.005)
