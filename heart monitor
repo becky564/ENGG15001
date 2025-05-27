@@ -59,7 +59,7 @@ else:
     print("heart beating too slow, (bradycardia?)")
 
 # Print the heart reading and potentiometer on the same line
-print("ECG: {}, {}, {} | Pot: {} | BPM: {}".format(value_1, value_2, value_3, potentiometer_reading, bpm))
+print("ECG: {}, {}, {} | Potentiometer: {} | BPM: {}".format(value_1, value_2, value_3, potentiometer_reading, bpm))
 
 # Insert 0.005s sleep to slow down the printing rate
 time.sleep(0.005)
